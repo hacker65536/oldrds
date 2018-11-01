@@ -27,6 +27,10 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/aws/external"
+	"github.com/aws/aws-sdk-go-v2/service/rds"
 )
 
 var cfgFile string
@@ -46,6 +50,19 @@ to quickly create a Cobra application.`,
 	//	Run: func(cmd *cobra.Command, args []string) { },
 }
 
+var (
+	rdssvc *rds.RDS
+	cfg    aws.Config
+	err    error
+)
+
+func chke(err error) {
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ErrOutput: \n", err)
+		os.Exit(1)
+	}
+}
+
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
@@ -56,6 +73,12 @@ func Execute() {
 }
 
 func init() {
+
+	cfg, err = external.LoadDefaultAWSConfig()
+	//cfg.Region = endpoints.UsEast1RegionID
+	chke(err)
+	rdssvc = rds.New(cfg)
+
 	cobra.OnInitialize(initConfig)
 
 	// Here you will define your flags and configuration settings.
